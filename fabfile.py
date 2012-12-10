@@ -21,6 +21,7 @@ env.python = 'python2.7'
 env.path = '/home/%(user)s/apps/%(project_name)s' % env
 env.repo_path = '%(path)s/repository' % env
 env.virtualenv_path = '%(path)s/virtualenv' % env
+env.tilemill_projects = os.path.expanduser('~/Documents/MapBox/project')
 env.forward_agent = True
 
 """
@@ -226,6 +227,31 @@ def deploy(remote='origin'):
 
     if env.get('deploy_to_servers', False):
         checkout_latest(remote)
+
+"""
+Application
+"""
+def local_render_map():
+    with cd('data'):
+        local('curl -O http://www.wfas.net/maps/data/fdc_f.zip')
+        local('unzip -o -j fdc_f.zip')
+        local('curl -O http://psgeodata.fs.fed.us/data/gis_data_download/dynamic/lg_incidents.zip')
+        local('unzip lg_incidents.zip')
+        local('ogr2ogr -overwrite -t_srs "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs" lg_incidents_reprojected.shp lg_incidents.shp')
+        local('ogr2ogr -overwrite -s_srs EPSG:2163 -t_srs "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs" fdc_f_reprojected.shp fdc_f.shp')
+
+    local('rm -rf %(tilemill_projects)s/%(project_name)s/' % env)
+    local('cp -R tilemill/ %(tilemill_projects)s/%(project_name)s/' % env)
+
+    with open('%(tilemill_projects)s/%(project_name)s/project.mml' % env, 'r') as f:
+        mml = f.read()
+
+    with open('%(tilemill_projects)s/%(project_name)s/project.mml' % env, 'w') as f:
+        mml = mml.replace('/Users/bboyer/src/us-wildfires/data/', os.path.join(os.getcwd(), 'data'))
+        f.write(mml)
+
+    local('/Applications/TileMill.app/Contents/Resources/node /Applications/TileMill.app/Contents/Resources/index.js export --format=sync --bbox=-124.848974,24.396308,-66.885444,49.384358 --minzoom=3 --maxzoom=9 us-wildfires README.md')
+
     
 """
 Destruction
