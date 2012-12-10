@@ -93,6 +93,26 @@ Deploy to a server
 
 The current configuration is for running cron jobs only. Web server configuration is not included.
 
-* In ``fabfile.py`` set ``env.deploy_to_servers`` to ``True``.
 * Run ``fab staging master setup`` to configure the server.
 * Run ``fab staging master deploy`` to deploy the app. 
+
+Rendering the map
+-----------------
+
+To render the map locally:
+
+```
+fab local_render_map
+```
+
+To render the map on the server, you must first define the environment variable ``MAPBOX_SYNC_ACCESS_TOKEN_WILDFIRES``. Then run:
+
+```
+TODO
+```
+
+To cron render map on the server:
+
+```
+TODO
+```

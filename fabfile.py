@@ -231,7 +231,7 @@ def deploy(remote='origin'):
 """
 Application
 """
-def local_render_map():
+def update_shapefiles():
     with cd('data'):
         local('curl -O http://www.wfas.net/maps/data/fdc_f.zip')
         local('unzip -o -j fdc_f.zip')
@@ -239,6 +239,9 @@ def local_render_map():
         local('unzip lg_incidents.zip')
         local('ogr2ogr -overwrite -t_srs "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs" lg_incidents_reprojected.shp lg_incidents.shp')
         local('ogr2ogr -overwrite -s_srs EPSG:2163 -t_srs "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs" fdc_f_reprojected.shp fdc_f.shp')
+
+def local_render_map():
+    update_shapefiles()
 
     local('rm -rf %(tilemill_projects)s/%(project_name)s/' % env)
     local('cp -R tilemill/ %(tilemill_projects)s/%(project_name)s/' % env)
@@ -252,7 +255,32 @@ def local_render_map():
 
     local('/Applications/TileMill.app/Contents/Resources/node /Applications/TileMill.app/Contents/Resources/index.js export --format=sync --bbox=-124.848974,24.396308,-66.885444,49.384358 --minzoom=3 --maxzoom=9 us-wildfires README.md')
 
-    
+def render_map():
+    run('cd %(repo_path)s; ../virtualenv/bin/fab cron_render_map')
+
+def cron_render_map():
+    update_shapefiles()
+
+    env.tilemill_projects = '%(path)s/tilemill-temp' % env  
+
+    local('rm -rf %(tilemill_projects)s' % env)
+    local('mkdir -p %(tilemill_projects)s/project/' % env)
+    local('mkdir -p %(tilemill_projects)s/cache/' % env)
+    local('cp -R %(repo_path)s/tilemill %(tilemill_projects)s/project/%(project_name)s' % env)
+
+    env.mml_path = '%(tilemill_projects)s/project/%(project_name)s/project.mml' % env
+
+    local('rm %(mml_path)s' % env)
+
+    with open(env.mml_path, 'r') as f:
+        mml = f.read()
+
+    with open(env.mml_path, 'w') as f:
+        mml = mml.replace('/Users/bboyer/src/us-wildfires/data/', os.path.join(os.getcwd(), 'data'))
+        f.write(mml)
+
+    local('/usr/share/tilemill/index.js export --format=sync --bbox=-124.848974,24.396308,-66.885444,49.384358 --minzoom=3 --maxzoom=9 --files=%(tilemill_projects)s --syncAccount=npr --syncAccessToken="$MAPBOX_SYNC_ACCESS_TOKEN_WILDFIRES" us-wildfires ./README.md' % env)
+
 """
 Destruction
 """
