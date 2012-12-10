@@ -255,7 +255,7 @@ def local_render_map():
     local('cp -R tilemill/ %(tilemill_projects)s/%(project_name)s/' % env)
 
     _rewrite_mml(
-        os.path.join(os.getcwd(), 'data'),
+        '%s/data/' % os.getcwd(),
         '%(tilemill_projects)s/%(project_name)s/project.mml' % env,
         '%(tilemill_projects)s/%(project_name)s/project.mml' % env
     )
@@ -278,7 +278,7 @@ def cron_render_map():
     env.mml_path = '%(tilemill_projects)s/project/%(project_name)s/project.mml' % env
 
     _rewrite_mml(
-        '%(path)s/data' % env,
+        '%(path)s/data/' % env,
         '%(tilemill_projects)s/%(project_name)s/project.mml' % env,
         '/tmp/project.mml'
     )
