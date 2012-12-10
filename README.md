@@ -108,11 +108,11 @@ fab local_render_map
 To render the map on the server, you must first define the environment variable ``MAPBOX_SYNC_ACCESS_TOKEN_WILDFIRES``. Then run:
 
 ```
-TODO
+fab render_map
 ```
 
 To cron render map on the server:
 
 ```
-TODO
+0,30 * * * * cd /home/ubuntu/apps/us-wildfires/repository && ../virtualenv/bin/fab server_render_map
 ```

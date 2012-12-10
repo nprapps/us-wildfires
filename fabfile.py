@@ -231,7 +231,17 @@ def deploy(remote='origin'):
 """
 Application
 """
+def update_config_from_tilemill():
+    """
+    Copy the latest configuration from TileMill to the local directory.
+    """
+    local('rm -rf tilemill/' % env)
+    local('cp -R %(tilemill_projects)s/%(project_name)s/ tilemill/' % env)
+
 def update_shapefiles():
+    """
+    Fetch the latest shapefiles and process them.
+    """
     with lcd('data'):
         local('curl -O http://www.wfas.net/maps/data/fdc_f.zip')
         local('unzip -o -j fdc_f.zip')
@@ -241,6 +251,9 @@ def update_shapefiles():
         local('ogr2ogr -overwrite -s_srs EPSG:2163 -t_srs "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs" fdc_f_reprojected.shp fdc_f.shp')
 
 def _rewrite_mml(data_root, mml_path):
+    """
+    Rewrite MML's with a given data path.
+    """
     with open(mml_path, 'r') as f:
         content = f.read()
 
@@ -248,9 +261,10 @@ def _rewrite_mml(data_root, mml_path):
         content = content.replace('/Users/bboyer/src/us-wildfires/data/', data_root)
         f.write(content)
 
-def local_render_map():
-    update_shapefiles()
-
+def update_config_from_version_control():
+    """
+    Copy the latest configuration to TileMill from the local directory.
+    """
     local('rm -rf %(tilemill_projects)s/%(project_name)s/' % env)
     local('cp -R tilemill/ %(tilemill_projects)s/%(project_name)s/' % env)
 
@@ -259,12 +273,25 @@ def local_render_map():
         '%(tilemill_projects)s/%(project_name)s/project.mml' % env
     )
 
+def local_render_map():
+    """
+    Render the map locally on OSX.
+    """
+    update_shapefiles()
+    update_config_from_version_control()
+
     local('/Applications/TileMill.app/Contents/Resources/node /Applications/TileMill.app/Contents/Resources/index.js export --format=sync --bbox=-124.848974,24.396308,-66.885444,49.384358 --minzoom=3 --maxzoom=9 us-wildfires README.md')
 
 def render_map():
-    run('cd %(repo_path)s; ../virtualenv/bin/fab cron_render_map' % env)
+    """
+    Render the map remotely on the server.
+    """
+    run('cd %(repo_path)s; ../virtualenv/bin/fab server_render_map' % env)
 
-def cron_render_map():
+def server_render_map():
+    """
+    Render the map locally on the server. Intended to be used as a cron.
+    """
     update_shapefiles()
 
     env.tilemill_projects = '%(path)s/tilemill-temp' % env  
