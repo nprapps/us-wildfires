@@ -2,10 +2,11 @@
 <html lang="en">
 
 <head>
-    <title>{{ project_name }}</title>
+    <title>FireForecast : NPR</title>
+	<base target="_blank" />
 	
 	<meta http-equiv="X-UA-Compatible" content="IE=8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 
 	<!-- CHARTBEAT -->
@@ -13,7 +14,7 @@
     
     <!-- CSS -->
     {{ CSS.push('bootstrap/css/bootstrap.css') }}
-    {{ CSS.push('bootstrap/css/bootstrap-responsive.css') }}
+    {{ CSS.push('css/bookmark-bubble.css') }}
     {% block extra_css %}{% endblock %}
     {{ CSS.push('less/app.less') }}
     {{ CSS.render('css/app.min.css') }}
@@ -50,20 +51,28 @@
 		*/
 	</script>
 
-	<!-- TODO
-	<meta property="og:title" content="Election 2012: Live Coverage From NPR News" />
-	<meta property="og:url" content="http://elections2012.npr.org/" />
+	<meta property="og:title" content="FireForecast : NPR" />
 	<meta property="og:type" content="article" />
-	<meta property="og:description" content="Follow the latest results, get breaking news and analysis, and listen to our live special broadcast." />
-	<meta property="og:image" content="http://media.npr.org/news/specials/2012/elections/election-promo_sq.gif" />
+	<meta property="og:image" content="http://npr.org/news/graphics/2012/08/firemap.png" />
+	<meta property="og:url" content="http://apps.npr.org/fire-forecast/" />
 	<meta property="og:site_name" content="NPR.org" />
-	<meta property="fb:app_id" content="138837436154588" />
-	-->
+	<meta property="og:description" content="Check the wildfire danger in your area. Updated daily." />
+	<meta property="og:country-name" content="USA" />
+	<link rel="shortcut icon" href="http://www.npr.org/favicon.ico">
+	<meta name="author" content="NPR News Apps">	
+    
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" href="img/touch-icon-57x57-precomposed.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="img/touch-icon-72x72-precomposed.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="img/touch-icon-114x114-precomposed.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="img/touch-icon-144x144-precomposed.png" />
 
     {% block extra_head %}
     {% endblock %}
 </head>
 <body>
+    {% block outer_content %}
     
     <div class="navbar navbar-fixed-top">
       <div class="navbar-inner">
@@ -127,11 +136,14 @@
         </div>
         
     </div>
+
+    {% endblock %}
     
 	{{ JS.push('js/lib/html5.js') }}
 	{{ JS.push('js/lib/underscore.js') }}
     {{ JS.push('js/lib/moment.js') }}
     {{ JS.push('bootstrap/js/bootstrap.js') }}
+    {{ JS.push('js/lib/bookmark-bubble.js') }}
     {% block extra_foot_js %}{% endblock %}
     {{ JS.push('js/templates.js') }}
     {{ JS.push('js/app.js') }}
