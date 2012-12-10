@@ -275,7 +275,7 @@ def cron_render_map():
     local('cp -R %(repo_path)s/tilemill %(tilemill_projects)s/project/%(project_name)s' % env)
 
     _rewrite_mml(
-        '%(path)s/data/' % env,
+        '%(repo_path)s/data/' % env,
         '%(tilemill_projects)s/project/%(project_name)s/project.mml' % env
     )
 
