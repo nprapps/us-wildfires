@@ -1,0 +1,49 @@
+#bookmark-bubble {
+    position:absolute;
+    z-index:1000;
+    width:100%;
+    left:0;
+    top:0;
+}
+
+#bookmark-bubble-inner {
+    position:relative;
+    width:300px;
+    padding:12px 16px 8px 4px;
+    color:#fff;
+    background-color:#333;
+    font-size:14px;
+    font-family:sans-serif;
+}
+
+#bookmark-bubble-icon {
+    float:left;
+    width:57px;
+    height:57px;
+    margin:-2px 7px 3px 5px;
+    -webkit-background-size:contain;
+    -webkit-border-radius:10px;
+    border:1px solid #333;
+}
+
+#bookmark-bubble-arrow {
+    width:25px;
+    height:19px;
+    position:absolute;
+    left:111px;
+}
+
+#bookmark-bubble-close {
+    position:absolute;
+    display:block;
+    top:-5px;
+    right:-5px;
+    width:32px;
+    height:32px;
+    border:10px solid transparent;
+    -webkit-background-size:contain;
+}
+
+#bookmark-bubble-clear {
+    clear:both;
+}

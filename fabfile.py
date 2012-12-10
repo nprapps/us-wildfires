@@ -13,7 +13,7 @@ Base configuration
 """
 env.project_name = app_config.PROJECT_NAME 
 env.deployed_name = app_config.DEPLOYED_NAME
-env.deploy_to_servers = False
+env.deploy_to_servers = True 
 env.repo_url = 'git@github.com:nprapps/%(project_name)s.git' % env
 env.alt_repo_url = 'git@bitbucket.org:nprapps/%(project_name)s.git' % env
 env.user = 'ubuntu'

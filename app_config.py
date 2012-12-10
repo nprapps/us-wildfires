@@ -2,8 +2,8 @@
 
 import os
 
-PROJECT_NAME = 'NEW_PROJECT_NAME'
-DEPLOYED_NAME = PROJECT_NAME 
+PROJECT_NAME = 'us-wildfires'
+DEPLOYED_NAME = 'fire-forecast' 
 
 PRODUCTION_S3_BUCKETS = ['apps.npr.org', 'apps2.npr.org']
 PRODUCTION_SERVERS = ['cron.nprapps.org']

@@ -1,43 +1,10 @@
-nprapps' Project Template
-=========================
+us-wildfires
+============
 
-About this template
--------------------
+Projections
+-----------
 
-This template provides a a project skeleton suitable for any project that is to be served entirely as flat files. Facilities are provided for rendering html from data, compiling LESS into CSS, deploying to S3, etc.
-
-What's in here?
----------------
-
-The project contains the following folders and important files:
-
-* ``data`` -- Data files, such as those used to generate HTML
-* ``jst`` -- Javascript ([Underscore.js](http://documentcloud.github.com/underscore/#template)) templates 
-* ``less`` -- [LESS](http://lesscss.org/) files, will be compiled to CSS and concatenated for deployment
-* ``templates`` -- HTML ([Jinja2](http://jinja.pocoo.org/docs/)) templates, to be compiled locally
-* ``www`` -- Static and compiled assets to be deployed (a.k.a. "the output")
-* ``app.py`` -- A [Flask](http://flask.pocoo.org/) app for rendering the project locally.
-* ``app_config.py`` -- Global project configuration for scripts, deployment, etc.
-* ``fabfile.py`` -- [Fabric](http://docs.fabfile.org/en/latest/) commands automating setup and deployment
-
-Copy the template
------------------
-
-```
-git clone git@github.com:nprapps/app-template.git $NEW_PROJECT_NAME
-cd $NEW_PROJECT_NAME
-rm -rf .git
-git init
-git add *
-git commit -am "Initial import from app-template."
-git remote add origin git@github.com:nprapps/$NEW_PROJECT_NAME.git
-git push -u origin master
-```
-
-Configure the project
----------------------
-
-* Update ``app_config.py`` with the name of the new project.
+why we do the reprojections the way we do: http://trac.osgeo.org/proj/wiki/FAQ#ChangingEllipsoidWhycantIconvertfromWGS84toGoogleEarthVirtualGlobeMercator
 
 Install requirements
 --------------------
@@ -58,15 +25,18 @@ mkvirtualenv $NEW_PROJECT_NAME
 pip install -r requirements.txt
 ```
 
-Generate index.html
--------------------
+Install server requirements
+---------------------------
 
-The app-template ships with several example templates and corresponding views.
-
-* Choose from the available templates which one to base your project on, e.g. ``templates/table.html``. Move this template to ``templates/index.html`` and delete the others.
-* Never edit ``www/index.html`` or other dynamically generated assets. Instead edit the templates.
-* Choose the view from ``app.py`` that matches your chosen index template. Rename it to ``index``, apply the ``@app.route('/')`` decorator to it and delete the others.  
-* Uncomment and update the ad code and Facebook tags at the top of ``templates/_base.html``. (or make yourself a ticket to do it later).
+```
+sudo apt-get install build-essential libwebkit-dev unzip
+sudo add-apt-repository ppa:developmentseed/mapbox
+sudo apt-get update
+sudo apt-get install tilemill
+sudo add-apt-repository ppa:ubuntugis/ppa
+sudo apt-get update
+sudo apt-get install gdal-bin
+```
 
 Adding a template/view
 ----------------------

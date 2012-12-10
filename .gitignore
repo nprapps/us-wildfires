@@ -43,3 +43,7 @@ www/js/app-footer.min.js
 www/js/templates.js
 www/js/tables.min.js
 
+data/fdc_f.*
+data/lg_incidents.*
+data/fdc_f_reprojected.*
+data/lg_incidents_reprojected.*
