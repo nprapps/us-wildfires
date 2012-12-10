@@ -232,7 +232,7 @@ def deploy(remote='origin'):
 Application
 """
 def update_shapefiles():
-    with cd('data'):
+    with lcd('data'):
         local('curl -O http://www.wfas.net/maps/data/fdc_f.zip')
         local('unzip -o -j fdc_f.zip')
         local('curl -O http://psgeodata.fs.fed.us/data/gis_data_download/dynamic/lg_incidents.zip')
