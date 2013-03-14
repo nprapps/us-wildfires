@@ -1,11 +1,20 @@
 $(document).ready(function(){
-    mapbox.load(['mapbox.mapbox-light','npr.us-wildfires'], function(data){
+    /*
+    * A function for decoding URL parameters.
+    */
+    $.urlParam = function(name){
+        var results = new RegExp('[\\?&amp;]' + name + '=([^&amp;#]*)').exec(window.location.href);
+        try { return decodeURIComponent(results[1]); }
+        catch(err) { return null; }
+    };
+
+    mapbox.load(['npr.map-94vv5tn9', 'npr.us-wildfires'], function(data){
         window.m = mapbox.map('map');
         m.addLayer(data[0].layer);
         m.addLayer(data[1].layer);
         m.setZoomRange(3,9);
         m.interaction.auto();
-    
+
         var width = $(window).width();
         if(width >= 960){
             m.zoom(4);
@@ -19,7 +28,7 @@ $(document).ready(function(){
             m.zoom(3);
             m.center({ lat: 40, lon: -97 });
         }
-    
+
         var markerLayer = mapbox.markers.layer();
         markerLayer.factory(function(feature) {
             var dangerCode = feature.properties.dangerCode;
@@ -27,32 +36,32 @@ $(document).ready(function(){
             var levelName;
             switch(dangerCode) {
                 case -9999:
-                    level = 'not-reported'
-                    levelName = 'Not reported'
+                    level = 'not-reported';
+                    levelName = 'Not reported';
                     break;
                 case 1:
-                    level = 'low'
-                    levelName = 'Low'
+                    level = 'low';
+                    levelName = 'Low';
                     break;
                 case 2:
-                    level = 'moderate'
-                    levelName = 'Moderate'
+                    level = 'moderate';
+                    levelName = 'Moderate';
                     break;
                 case 3:
-                    level = 'high'
-                    levelName = 'High'
+                    level = 'high';
+                    levelName = 'High';
                     break;
                 case 4:
-                    level = 'very-high'
-                    levelName = 'Very high'
+                    level = 'very-high';
+                    levelName = 'Very high';
                     break;
                 case 5:
-                    level = 'extreme'
-                    levelName = 'Extreme'
+                    level = 'extreme';
+                    levelName = 'Extreme';
                     break;
                 default:
-                    level = 'not-reported'
-                    levelName = 'Not reported'
+                    level = 'not-reported';
+                    levelName = 'Not reported';
                     break;
             }
             var cityState = '';
@@ -62,47 +71,44 @@ $(document).ready(function(){
             window.newPopup = $('<div class="danger-popup">Wildfire Danger<div class="city-state">' + cityState + '</div><div class="danger-rating danger-' + level + '">' + levelName + '</div><div class="pointer"></div></div>');
             return newPopup[0];
         });
-        m.addLayer(markerLayer);    
+        m.addLayer(markerLayer);
         $('#find,#find2').click(function(){
             navigator.geolocation.getCurrentPosition(
                 function(position) {
-                    zoomToPin(position.coords.latitude,position.coords.longitude);
+                    geocode(position.coords.latitude + ',' + position.coords.longitude);
                 },
                 function(err) {
                     alert('Your location could not be found. Try enabling location services.');
                 }
             );
         });
-    
+
         function on_all_loaded(layer, callback) {
-            if (layer.requestManager.openRequestCount == 0) {
+            if (layer.requestManager.openRequestCount === 0) {
                 callback();
             } else {
                 var cb = function() {
                     if (layer.requestManager.openRequestCount > 0) return;
                     else callback();
                     layer.requestManager.removeCallback('requestcomplete', cb);
-                }
+                };
                 layer.requestManager.addCallback('requestcomplete', cb);
             }
         }
-            
+
         function zoomToPin(lat,lon,placeCity,placeState){
-            //set the center and zoom in                    
-            m.center({
-                lon: lon,
-                lat: lat
-            });
+            //set the center and zoom in
+            m.center({ lon: lon, lat: lat });
             m.zoom(8);
             markerLayer.features([]);
             m.refresh();
-        
+
             on_all_loaded(m.getLayerAt(0), function() {
                 m.interaction.screen_feature({
                     x: m.dimensions.x / 2,
                     y: m.dimensions.y / 2 }, function(ft) {
                     //pass an empty array to clear the features
-                
+
                     var dangerCode;
                     if(ft) {
                         dangerCode = ft.GRID_CODE;
@@ -125,7 +131,7 @@ $(document).ready(function(){
                 });
             });
         }
-            
+
         $('#search').submit(function(e){
             e.preventDefault();
             geocode(encodeURIComponent($('#search input').val()));
@@ -134,7 +140,7 @@ $(document).ready(function(){
             e.preventDefault();
             geocode(encodeURIComponent($('#search2 input').val()));
         });
-            
+
         function geocode(query){
             $.ajax({
                url: 'http://open.mapquestapi.com/nominatim/v1/search?format=json&countrycodes=us&limit=1&addressdetails=1&q=' + query,
@@ -145,32 +151,32 @@ $(document).ready(function(){
                    value = response[0];
                    if (value === undefined) {
                        alert('That location could not be found. Try using a city, state, Zip Code or mailing address.');
-                   } else { 
+                   } else {
                        zoomToPin(value.lat, value.lon, value.address[value.type], value.address.state);
                    }
                }
             });
         }
-    
+
         function setupBookmarkBubble(){
-    
-            //update the bubble text so that it's correct for this app 
+
+            //update the bubble text so that it's correct for this app
             google.bookmarkbubble.Bubble.prototype.msg = {
-              android: 
+              android:
                 '<b>Install this app:</b><br /> 1) Add to Bookmarks,<br /> 2) Tap and Hold the bookmark,<br /> 3) Select "<b>Add Shortcut to Home</b>"',
-              android3: 
+              android3:
                 '<b>Install this app:</b><br /> Tap <img src="'+ google.bookmarkbubble.Bubble.prototype.IMAGE_ANDROID3_BOOKMARK_DATA_URL_ +'" style="height: 1.5em;display: inline-block;padding:0;margin:0;" />,<br /> select "<b>Add to</b>" and then "<b>Home screen</b>"',
-              android4: 
+              android4:
                 '<b>Install this app:</b><br /> 1) Tap <img src="'+ google.bookmarkbubble.Bubble.prototype.IMAGE_ANDROID4_MOBILE_BOOKMARK_DATA_URL_ +'" style="height: 1.5em;display: inline-block;padding:0;margin:0;" />,<br /> 2) Select "<b>Save to bookmarks</b>",<br /> 3) Select "<b>Add to</b>" and then "<b>Home</b>"',
-              blackberry: 
+              blackberry:
                 '<b>Install this app:</b><br /> Tap <img src="'+ google.bookmarkbubble.Bubble.prototype.IMAGE_BLACKBERRY_ICON_DATA_URL_ +'" style="height: 1em;display: inline-block;padding:0;margin:0" />, select "<b>Add to Home Screen</b>"',
-              playbook: 
+              playbook:
                  '<b>Install this app:</b><br /> Tap <img src="'+ google.bookmarkbubble.Bubble.prototype.IMAGE_PLAYBOOK_BOOKMARK_DATA_URL_ +'" style="height: 1.5em;display: inline-block;padding:0;margin:0;" />, select  <br />"<b>Add to Home Screen</b>"',
               ios42orlater :
                  '<b>Install this app</b>:<br /> Tap <img src="'+ google.bookmarkbubble.Bubble.prototype.IMAGE_SAFARI_FORWARD_DATA_URL_ +'" style="height: 1em;display: inline-block;padding: 0;margin: 0" /> and then<br /><b>"Add to Home Screen"</b>',
               ioslegacy: '<b>Install this app</b>:<br /> Tap <b style="font-size:15px">+</b> and then<br /><b>"Add to Home Screen"</b>'
             };
-    
+
             /** Don't show the bubble if click dismiss button at 3 times. */
             google.bookmarkbubble.Bubble.prototype.NUMBER_OF_TIMES_TO_DISMISS=3;
 
@@ -184,7 +190,7 @@ $(document).ready(function(){
                 var parameter = page_popup_bubble;
 
                 bubble.hasHashParameter = function() {
-                    return location.hash == "" && location.href.indexOf(parameter) == location.href.length - 1;
+                    return location.hash === "" && location.href.indexOf(parameter) == location.href.length - 1;
                 };
 
                 bubble.setHashParameter = function() {
@@ -204,7 +210,7 @@ $(document).ready(function(){
                 $(".legend-contents").clone().appendTo(".modal-body");
             }
         });
-    
+
         if(window.location.search.indexOf("embed") > 0) {
             $("#nav").hide();
             $("#embed-nav").show();
@@ -214,10 +220,17 @@ $(document).ready(function(){
             //only set up the bubble if we're not embedded
             setupBookmarkBubble();
         }
-    
+
         //for old browsers and for IE in a frame
         if (!navigator.geolocation) {
             $("#find,find2").hide();
+        }
+
+        // If URL path has a lat/lon pair, snap to that view.
+        var urlLat = $.urlParam('lat');
+        var urlLon = $.urlParam('lon');
+        if (urlLat && urlLon) {
+            geocode(urlLat +','+ urlLon);
         }
     });
 });

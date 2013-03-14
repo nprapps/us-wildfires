@@ -11,11 +11,11 @@ import app_config
 """
 Base configuration
 """
-env.project_name = app_config.PROJECT_NAME 
+env.project_name = app_config.PROJECT_NAME
 env.deployed_name = app_config.DEPLOYED_NAME
-env.deploy_to_servers = True 
+env.deploy_to_servers = True
 env.repo_url = 'git@github.com:nprapps/%(project_name)s.git' % env
-env.alt_repo_url = None 
+env.alt_repo_url = None
 env.user = 'ubuntu'
 env.python = 'python2.7'
 env.path = '/home/%(user)s/apps/%(project_name)s' % env
@@ -92,7 +92,7 @@ def render():
     Render HTML templates and compile assets.
     """
     from flask import g
-    
+
     less()
     jst()
 
@@ -115,7 +115,7 @@ def render():
         elif rule_string.endswith('.html'):
             filename = 'www' + rule_string
         else:
-            print 'Skipping %s' % name 
+            print 'Skipping %s' % name
             continue
 
         print 'Rendering %s' % (filename)
@@ -294,7 +294,7 @@ def server_render_map():
     """
     update_shapefiles()
 
-    env.tilemill_projects = '%(path)s/tilemill-temp' % env  
+    env.tilemill_projects = '%(path)s/tilemill-temp' % env
 
     local('rm -rf %(tilemill_projects)s' % env)
     local('mkdir -p %(tilemill_projects)s/project/' % env)
@@ -317,7 +317,7 @@ def shiva_the_destroyer():
     """
     with settings(warn_only=True):
         s3cmd = 's3cmd del --recursive %s' % env
-        
+
         for bucket in env.s3_buckets:
             env.s3_bucket = bucket
             local(s3cmd % ('s3://%(s3_bucket)s/%(deployed_name)s' % env))
