@@ -1,9 +1,10 @@
 $(document).ready(function(){
-    /*
-    * A function for decoding URL parameters.
-    */
+
     $.urlParam = function(name){
-        var results = new RegExp('[\\?&amp;]' + name + '=([^&amp;#]*)').exec(window.location.href);
+        /*
+        * A function for decoding URL parameters.
+        */
+        var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec(window.location.href);
         try { return decodeURIComponent(results[1]); }
         catch(err) { return null; }
     };
@@ -65,8 +66,12 @@ $(document).ready(function(){
                     break;
             }
             var cityState = '';
-            if(feature.properties.placeCity){
-                cityState = feature.properties.placeCity + ', ' + feature.properties.placeState;
+            if (feature.properties.placeCity){
+                cityState += feature.properties.placeCity;
+            }
+            if (feature.properties.placeState){
+                if(feature.properties.placeCity){ cityState += ', '; }
+                cityState += feature.properties.placeState;
             }
             window.newPopup = $('<div class="danger-popup">Wildfire Danger<div class="city-state">' + cityState + '</div><div class="danger-rating danger-' + level + '">' + levelName + '</div><div class="pointer"></div></div>');
             return newPopup[0];
@@ -84,6 +89,9 @@ $(document).ready(function(){
         });
 
         function on_all_loaded(layer, callback) {
+            /*
+            * A function for delaying action until the underlying layer grids have completed rendering.
+            */
             if (layer.requestManager.openRequestCount === 0) {
                 callback();
             } else {
@@ -96,25 +104,24 @@ $(document).ready(function(){
             }
         }
 
-        function zoomToPin(lat,lon,placeCity,placeState){
+        function zoomToPin(lat, lon, placeCity, placeState){
             //set the center and zoom in
             m.center({ lon: lon, lat: lat });
             m.zoom(8);
+
+            //pass an empty array to clear the features
             markerLayer.features([]);
             m.refresh();
 
-            on_all_loaded(m.getLayerAt(0), function() {
+            // Wrap the interaction in a function which waits for the grid to load.
+            // Very important for deciding your forecast, as the grid has all the data.
+            on_all_loaded(m.getLayerAt(1), function() {
                 m.interaction.screen_feature({
                     x: m.dimensions.x / 2,
                     y: m.dimensions.y / 2 }, function(ft) {
-                    //pass an empty array to clear the features
 
-                    var dangerCode;
-                    if(ft) {
-                        dangerCode = ft.GRID_CODE;
-                    } else {
-                        dangerCode: -9999;
-                    }
+                    var dangerCode = -9999;
+                    if(ft) { dangerCode = ft.GRID_CODE; }
                     markerLayer.add_feature({
                         geometry: {
                             coordinates: [
@@ -132,11 +139,11 @@ $(document).ready(function(){
             });
         }
 
-        $('#search').submit(function(e){
+        $('#search').on('submit', function(e){
             e.preventDefault();
             geocode(encodeURIComponent($('#search input').val()));
         });
-        $('#search2').submit(function(e){
+        $('#search2').on('submit', function(e){
             e.preventDefault();
             geocode(encodeURIComponent($('#search2 input').val()));
         });
@@ -230,7 +237,7 @@ $(document).ready(function(){
         var urlLat = $.urlParam('lat');
         var urlLon = $.urlParam('lon');
         if (urlLat && urlLon) {
-            geocode(urlLat +','+ urlLon);
+            zoomToPin(urlLat, urlLon, $.urlParam('city'), $.urlParam('state'));
         }
     });
 });

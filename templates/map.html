@@ -5,7 +5,8 @@
 {% endblock %}
 
 {% block extra_foot %}
-    <script type="text/javascript" src="js/lib/mapbox.js"></script>
+    <script type="text/javascript" src="js/lib/mapbox-0.6.7.min.js"></script>
+    <!-- <script type="text/javascript" src="http://api.tiles.mapbox.com/mapbox.js/v0.6.7/mapbox.js"></script> -->
 {% endblock %}
 
 {% block outer_content %}
@@ -62,10 +63,10 @@
             </ul>
     		<p class="read-more">Read more: <a href="http://www.npr.org/series/158936457/megafires-the-new-normal-in-the-southwest">Megafires: The New Normal In The Southwest</a></p>
     		<p class="byline">
-                By <a href="mailto:mstiles@npr.org">Matt Stiles</a>, <a href="mailto:sdotreppe@npr.org">Stephanie D'Otreppe</a><br/>and <a href="mailto:bboyer@npr.org">Brian Boyer</a> &mdash; August 23, 2012
+                By <a href="mailto:mstiles@npr.org">Matt Stiles</a>, <a href="mailto:sdotreppe@npr.org">Stephanie D'Otreppe</a>,<br/><a href="mailto:jbowers@npr.org">Jeremy Bowers</a> and <a href="mailto:bboyer@npr.org">Brian Boyer</a><br/>&mdash; March 15, 2013
             </p>
     		<p class="source">
-                Source: U.S. Forest Service (<a href="http://www.wfas.net/index.php/fire-danger-rating-fire-potential--danger-32">Forecast updated</a> each morning, <a href="http://psgeodata.fs.fed.us/download.html#tabs-ini-1">fires updated</a> every 30 minutes, 4-10 a.m. Mountain Time.)
+                Source: U.S. Forest Service (<a href="http://www.wfas.net/index.php/fire-danger-rating-fire-potential--danger-32">Forecast updated</a> each morning, <a href="http://psgeodata.fs.fed.us/download.html#tabs-ini-1">fires updated</a> every 2 hours, 4-10 a.m. Mountain Time.)
             </p>
     		<p class="source">
                 Geocoding provided by <a href="http://developer.mapquest.com/">Mapquest</a>.
@@ -85,5 +86,5 @@
       <div class="modal-body">
       </div>
 	</div>
-    
+
 {% endblock %}
