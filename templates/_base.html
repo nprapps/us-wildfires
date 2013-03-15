@@ -4,21 +4,22 @@
 <head>
     <title>FireForecast : NPR</title>
 	<base target="_blank" />
-	
+
 	<meta http-equiv="X-UA-Compatible" content="IE=8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 
 	<!-- CHARTBEAT -->
     <script type="text/javascript">var _sf_startpt=(new Date()).getTime()</script>
-    
+
     <!-- CSS -->
     {{ CSS.push('bootstrap/css/bootstrap.css') }}
     {{ CSS.push('css/bookmark-bubble.css') }}
     {% block extra_css %}{% endblock %}
     {{ CSS.push('less/app.less') }}
     {{ CSS.render('css/app.min.css') }}
-
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5.1/leaflet.css" />
+    <!--[if lte IE 8]><link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5.1/leaflet.ie.css" /><![endif]-->
     <!-- AD CODE -->
     <script>
         NPR = {};
@@ -59,8 +60,8 @@
 	<meta property="og:description" content="Check the wildfire danger in your area. Updated daily." />
 	<meta property="og:country-name" content="USA" />
 	<link rel="shortcut icon" href="http://www.npr.org/favicon.ico">
-	<meta name="author" content="NPR News Apps">	
-    
+	<meta name="author" content="NPR News Apps">
+
 	<meta name="apple-mobile-web-app-capable" content="yes">
 	<meta name="apple-mobile-web-app-status-bar-style" content="black">
     <link rel="apple-touch-icon-precomposed" href="img/touch-icon-57x57-precomposed.png" />
@@ -73,7 +74,7 @@
 </head>
 <body>
     {% block outer_content %}
-    
+
     <div class="navbar navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container">
@@ -110,15 +111,15 @@
 						NPR.messaging.warning('Problem fetching/rendering ad server code.', 'DFP.renderlocation', NPR.messaging.constants.SPONSORSHIP_ERROR);
 					}
 				// -->
-				</script>                  
+				</script>
 				<!-- END UNDERWRITING -->
 				<p class="left">NPR thanks our sponsors</p>
 				<p class="right"><a href="http://www.npr.org/about/place/corpsupport/">Become an NPR Sponsor </a></p>
 				</div></div>
-				<!-- END 300X250 AD --> 
+				<!-- END 300X250 AD -->
             </div>
         </div>
-        
+
         <div id="footer" class="row">
             <div class="span12">
             	<ul class="bottomlist">
@@ -134,11 +135,14 @@
             	</ul>
             </div>
         </div>
-        
+
     </div>
 
     {% endblock %}
-    
+
+    <script src="http://cdn.leafletjs.com/leaflet-0.5.1/leaflet.js"></script>
+    <script src="js/lib/leaflet.utfgrid.js"></script>
+
 	{{ JS.push('js/lib/html5.js') }}
 	{{ JS.push('js/lib/underscore.js') }}
     {{ JS.push('js/lib/moment.js') }}
@@ -146,7 +150,7 @@
     {{ JS.push('js/lib/bookmark-bubble.js') }}
     {% block extra_foot_js %}{% endblock %}
     {{ JS.push('js/templates.js') }}
-    {{ JS.push('js/app.js') }}
+    {{ JS.push('js/app3.js') }}
     {{ JS.render('js/app-footer.min.js') }}
 
     {% block extra_foot %}
