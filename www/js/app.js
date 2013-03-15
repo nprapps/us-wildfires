@@ -115,7 +115,7 @@ $(document).ready(function(){
 
             // Wrap the interaction in a function which waits for the grid to load.
             // Very important for deciding your forecast, as the grid has all the data.
-            on_all_loaded(m.getLayerAt(1), function() {
+            on_all_loaded(m.getLayerAt(0), function() {
                 m.interaction.screen_feature({
                     x: m.dimensions.x / 2,
                     y: m.dimensions.y / 2 }, function(ft) {
