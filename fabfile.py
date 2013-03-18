@@ -13,7 +13,7 @@ Base configuration
 """
 env.project_name = app_config.PROJECT_NAME
 env.deployed_name = app_config.DEPLOYED_NAME
-env.deploy_to_servers = True
+env.deploy_to_servers = False
 env.repo_url = 'git@github.com:nprapps/%(project_name)s.git' % env
 env.alt_repo_url = None
 env.user = 'ubuntu'
@@ -316,14 +316,12 @@ def shiva_the_destroyer():
     Deletes the app from s3
     """
     with settings(warn_only=True):
-        s3cmd = 's3cmd del --recursive %s' % env
 
         for bucket in env.s3_buckets:
-            env.s3_bucket = bucket
-            local(s3cmd % ('s3://%(s3_bucket)s/%(deployed_name)s' % env))
+            local('s3cmd del --recursive s3://%s/%s' % (bucket, env.deployed_name))
 
         if env.get('alt_s3_bucket', None):
-            local(s3cmd % ('s3://%(alt_s3_bucket)s/%(deployed_name)s' % env))
+            local('s3cmd del --recursive s3://%s/%s' % (env.get('alt_s3_bucket', None), env.deployed_name))
 
         if env.get('deploy_to_servers', False):
             run('rm -rf %(path)s' % env)
