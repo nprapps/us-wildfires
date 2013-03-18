@@ -1,3 +1,8 @@
+/*
+* Modified 2013-03-18 by @jeremybowers and @onyxfish to support synchronous
+* loading of utfgrid data.
+*/
+
 L.Util.ajax = function (url, cb) {
 	// the following is from JavaScript: The Definitive Guide
 	// and https://developer.mozilla.org/en-US/docs/DOM/XMLHttpRequest/Using_XMLHttpRequest_in_IE6
@@ -42,7 +47,6 @@ L.UtfGrid = L.Class.extend({
 		pointerCursor: true
 	},
 
-	//The thing the mouse is currently on
 	_mouseOn: null,
 
 	initialize: function (url, options) {
@@ -51,8 +55,6 @@ L.UtfGrid = L.Class.extend({
 		this._url = url;
 		this._cache = {};
 
-		//Find a unique id in window we can use for our callbacks
-		//Required for jsonP
 		var i = 0;
 		while (window['lu' + i]) {
 			i++;
@@ -77,7 +79,6 @@ L.UtfGrid = L.Class.extend({
 		if (zoom > this.options.maxZoom || zoom < this.options.minZoom) {
 			return;
 		}
-
 		map.on('click', this._click, this);
 		map.on('mousemove', this._move, this);
 		map.on('moveend', this._update, this);
@@ -90,61 +91,100 @@ L.UtfGrid = L.Class.extend({
 		map.off('moveend', this._update, this);
 	},
 
+	// Modified to use the dataForLatLng() function and a callback.
 	_click: function (e) {
-		this.fire('click', this._objectForEvent(e));
+		var self = this;
+		this.dataForLatLng(e.latlng, function(data){
+			self.fire('click', data);
+		});
 	},
+
+	// Modified to use the dataForLatLng() function and a callback.
 	_move: function (e) {
-		var on = this._objectForEvent(e);
+		var self = this;
+		this.dataForLatLng(e.latlng, function(data){
 
-		if (on.data !== this._mouseOn) {
-			if (this._mouseOn) {
-				this.fire('mouseout', { latlng: e.latlng, data: this._mouseOn });
-				if (this.options.pointerCursor) {
-					this._container.style.cursor = '';
+			if (data.data !== self._mouseOn) {
+				if (self._mouseOn) {
+					self.fire('mouseout', { latlng: e.latlng, data: self._mouseOn });
+					if (self.options.pointerCursor) {
+						self._container.style.cursor = '';
+					}
 				}
-			}
-			if (on.data) {
-				this.fire('mouseover', on);
-				if (this.options.pointerCursor) {
-					this._container.style.cursor = 'pointer';
+				if (data.data) {
+					self.fire('mouseover', data);
+					if (self.options.pointerCursor) {
+						self._container.style.cursor = 'pointer';
+					}
 				}
+
+				self._mouseOn = data.data;
+			} else if (data.data) {
+				self.fire('mousemove', data);
 			}
 
-			this._mouseOn = on.data;
-		} else if (on.data) {
-			this.fire('mousemove', on);
-		}
+		});
 	},
 
-	dataForLatLng: function(latlng) {
+	dataForLatLng: function(latlng, callback) {
+		/*
+		* So, our problem is that while Leaflet loads the TILES we need to make the map
+		* visible, it's not loading the utfgrid for the corresponding JSON objects
+		* synchronously. That process is happening asynchronously and without a callback.
+		*
+		* Our change to this process forces the utfgrid loading process to occur with a callback
+		* so that we can specify that any particular grid point be loaded when we need it.
+		*/
 
+		// Trick to solve global scope. "this" ain't what you think it is within the enclosures.
+		var self = this;
+
+		// Unchanged.
 		var map = this._map,
-		    point = map.project(latlng),
-		    tileSize = this.options.tileSize,
-		    resolution = this.options.resolution,
-		    x = Math.floor(point.x / tileSize),
-		    y = Math.floor(point.y / tileSize),
-		    gridX = Math.floor((point.x - (x * tileSize)) / resolution),
-		    gridY = Math.floor((point.y - (y * tileSize)) / resolution),
+			point = map.project(latlng),
+			tileSize = this.options.tileSize,
+			resolution = this.options.resolution,
+			x = Math.floor(point.x / tileSize),
+			y = Math.floor(point.y / tileSize),
+			gridX = Math.floor((point.x - (x * tileSize)) / resolution),
+			gridY = Math.floor((point.y - (y * tileSize)) / resolution),
 			max = map.options.crs.scale(map.getZoom()) / tileSize;
 
 		x = (x + max) % max;
 		y = (y + max) % max;
 
-		console.log(this._cache)
+		// Get the zoom level. We need this below.
+		var zoom = map.getZoom();
 
-		// var data = this._cache[map.getZoom() + '_' + x + '_' + y];
-		var data = this._cache['5_5_12'];
+		// First, try to get this bit of data from the cache. It might have already been loaded by the
+		// asynchronous process happening behind the scenes.
+		var data = this._cache[zoom + '_' + x + '_' + y];
 
-		console.log(data);
-
-		if (!data) {
-			return { latlng: latlng, data: null };
+		// If we did get this data from the cache, fire the callback with our formatted data.
+		if (data) {
+			callback(this._lookupGrid(latlng, data, gridX, gridY));
+			return;
 		}
 
+		// If this data wasn't in the cache, force the _loadTile(P) bits to run.
+		// Then, fire the callback with our data.
+		if (this.options.useJsonP) {
+			this._loadTileP(zoom, x, y, function(data){
+				callback(self._lookupGrid(latlng, data, gridX, gridY));
+				return;
+			});
+		} else {
+			this._loadTile(zoom, x, y, function(data){
+				callback(self._lookupGrid(latlng, data, gridX, gridY));
+				return;
+			});
+		}
+	},
+
+	_lookupGrid: function(latlng, data, gridX, gridY) {
 		var idx = this._utfDecode(data.grid[gridY].charCodeAt(gridX)),
-		    key = data.keys[idx],
-		    result = data.data[key];
+		key = data.keys[idx],
+		result = data.data[key];
 
 		if (!data.data.hasOwnProperty(key)) {
 			result = null;
@@ -153,44 +193,13 @@ L.UtfGrid = L.Class.extend({
 		return { latlng: latlng, data: result};
 	},
 
-	_objectForEvent: function (e) {
-
-		var map = this._map,
-		    point = map.project(e.latlng),
-		    tileSize = this.options.tileSize,
-		    resolution = this.options.resolution,
-		    x = Math.floor(point.x / tileSize),
-		    y = Math.floor(point.y / tileSize),
-		    gridX = Math.floor((point.x - (x * tileSize)) / resolution),
-		    gridY = Math.floor((point.y - (y * tileSize)) / resolution),
-			max = map.options.crs.scale(map.getZoom()) / tileSize;
-
-		x = (x + max) % max;
-		y = (y + max) % max;
-
-		var data = this._cache[map.getZoom() + '_' + x + '_' + y];
-		if (!data) {
-			return { latlng: e.latlng, data: null };
-		}
-
-		var idx = this._utfDecode(data.grid[gridY].charCodeAt(gridX)),
-		    key = data.keys[idx],
-		    result = data.data[key];
-
-		if (!data.data.hasOwnProperty(key)) {
-			result = null;
-		}
-
-		return { latlng: e.latlng, data: result};
-	},
-
-	//Load up all required json grid files
-	//TODO: Load from center etc
+	// This is where the asynchronous update process is happening.
+	// It's too magic for our taste. We have definite needs for certain tiles to be loaded.
 	_update: function () {
 
 		var bounds = this._map.getPixelBounds(),
-		    zoom = this._map.getZoom(),
-		    tileSize = this.options.tileSize;
+			zoom = this._map.getZoom(),
+			tileSize = this.options.tileSize;
 
 		if (zoom > this.options.maxZoom || zoom < this.options.minZoom) {
 			return;
@@ -204,7 +213,6 @@ L.UtfGrid = L.Class.extend({
 				Math.floor(bounds.max.y / tileSize)),
 				max = this._map.options.crs.scale(zoom) / tileSize;
 
-		//Load all required ones
 		for (var x = nwTilePoint.x; x <= seTilePoint.x; x++) {
 			for (var y = nwTilePoint.y; y <= seTilePoint.y; y++) {
 
@@ -224,12 +232,13 @@ L.UtfGrid = L.Class.extend({
 		}
 	},
 
-	_loadTileP: function (zoom, x, y) {
+	// Slightly modified to include the callback as part of the function.
+	_loadTileP: function (zoom, x, y, callback) {
 		var head = document.getElementsByTagName('head')[0],
-		    key = zoom + '_' + x + '_' + y,
-		    functionName = 'lu_' + key,
-		    wk = this._windowKey,
-		    self = this;
+			key = zoom + '_' + x + '_' + y,
+			functionName = 'lu_' + key,
+			wk = this._windowKey,
+			self = this;
 
 		var url = L.Util.template(this._url, L.Util.extend({
 			s: L.TileLayer.prototype._getSubdomain.call(this, { x: x, y: y }),
@@ -245,6 +254,9 @@ L.UtfGrid = L.Class.extend({
 
 		window[wk][functionName] = function (data) {
 			self._cache[key] = data;
+
+			// After the data gets inserted into the cache, trigger the callback.
+			if (callback) { callback(data); }
 			delete window[wk][functionName];
 			head.removeChild(script);
 		};
@@ -252,7 +264,8 @@ L.UtfGrid = L.Class.extend({
 		head.appendChild(script);
 	},
 
-	_loadTile: function (zoom, x, y) {
+	// Also slightly modified to include the callback as part of the function.
+	_loadTile: function (zoom, x, y, callback) {
 		var url = L.Util.template(this._url, L.Util.extend({
 			s: L.TileLayer.prototype._getSubdomain.call(this, { x: x, y: y }),
 			z: zoom,
@@ -264,6 +277,9 @@ L.UtfGrid = L.Class.extend({
 		var self = this;
 		L.Util.ajax(url, function (data) {
 			self._cache[key] = data;
+
+			// After the data gets inserted into the cache, trigger the callback.
+			if (callback) { callback(data); }
 		});
 	},
 

@@ -13,13 +13,13 @@
     <script type="text/javascript">var _sf_startpt=(new Date()).getTime()</script>
 
     <!-- CSS -->
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5.1/leaflet.css" />
+    <!--[if lte IE 8]><link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5.1/leaflet.ie.css" /><![endif]-->
     {{ CSS.push('bootstrap/css/bootstrap.css') }}
     {{ CSS.push('css/bookmark-bubble.css') }}
     {% block extra_css %}{% endblock %}
     {{ CSS.push('less/app.less') }}
     {{ CSS.render('css/app.min.css') }}
-    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5.1/leaflet.css" />
-    <!--[if lte IE 8]><link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5.1/leaflet.ie.css" /><![endif]-->
     <!-- AD CODE -->
     <script>
         NPR = {};
@@ -140,17 +140,16 @@
 
     {% endblock %}
 
-    <script src="http://cdn.leafletjs.com/leaflet-0.5.1/leaflet.js"></script>
-    <script src="js/lib/leaflet.utfgrid.js"></script>
-
-	{{ JS.push('js/lib/html5.js') }}
-	{{ JS.push('js/lib/underscore.js') }}
+    {{ JS.push('js/lib/leaflet-0.5.1.min.js')}}
+    {{ JS.push('js/lib/leaflet.utfgrid.js')}}
+    {{ JS.push('js/lib/html5.js') }}
+    {{ JS.push('js/lib/underscore.js') }}
     {{ JS.push('js/lib/moment.js') }}
     {{ JS.push('bootstrap/js/bootstrap.js') }}
     {{ JS.push('js/lib/bookmark-bubble.js') }}
     {% block extra_foot_js %}{% endblock %}
     {{ JS.push('js/templates.js') }}
-    {{ JS.push('js/app3.js') }}
+    {{ JS.push('js/app.js') }}
     {{ JS.render('js/app-footer.min.js') }}
 
     {% block extra_foot %}

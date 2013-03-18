@@ -211,52 +211,54 @@ p.desc {background:url('../img/npr_75x25.png') no-repeat center left; padding-le
     right: -5px;
     top: -10px;
 }
+.leaflet-left { display:none!important; }
 
-.zoomer {
-    right:14px;
-    top:123px;
-    left:auto;
+.leaflet-control-zoom a {
+    width:36px!important;
+    height:36px!important;
+    line-height:36px!important;
+    font-size:32px!important;
+    color:#555!important;
 }
 
-.zoomer.zoomout {
-    right:43px;
+.leaflet-right {
+    right:20px!important;
+}
+
+.leaflet-top {
+    top:123px!important;
 }
 
 .map-tooltip {
-    display:none;
+    display:none!important;
 }
 
-.danger-popup {
-    position: absolute;
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+    background-color: #333!important;
+}
+
+.leaflet-popup-content-wrapper {
+    border-radius: 5px!important;
+}
+
+.leaflet-popup-content {
     background-color: #333;
-    -webkit-border-radius: 5px;
-    -moz-border-radius: 5px;
-    border-radius: 5px;
     width: 160px;
     color: white;
-    padding: 12px 15px 15px;
     font-weight: bold;
     font-size: 16px;
-    margin-left: -95px;
-    margin-top: -117px;
     text-align: center;
 }
 
-.danger-popup .city-state {
+.leaflet-popup-content .city-state {
     font-size: 10px;
     line-height: 9px;
     margin-top: 6px;
     font-weight: normal;
 }
 
-.danger-popup .pointer {
-    background-image:url('../img/down-arrow.png');
-    height:10px;
-    width:18px;
-    position:absolute;
-    bottom:-10px;
-    left: 85px;
-}
+.leaflet-container a.leaflet-popup-close-button { display:none!important; }
 
 .danger-rating { width:150px; color:#333; padding:5px; margin: 10px 0 0; text-transform:uppercase; text-align:center; font-size:14px; }
 .danger-low { background-color: #77b0d3; }
@@ -278,7 +280,7 @@ p.desc {background:url('../img/npr_75x25.png') no-repeat center left; padding-le
     #topper h1 { font-size:28px; line-height:56px; margin-left:15px; float:left; }
     #topper h2 { font-size:14px; line-height:66px; margin-left:15px; float:left; }
     #topper #about { width:150px; font-size:14px; }
-    #find,#find2 { width:164px; font-size:12px; height:40px; }
+    #find,#find2 { width:166px; font-size:12px; height:40px; }
     #bottom #search input[type="text"] { font-size: 16px; width:250px; }
 }
 
