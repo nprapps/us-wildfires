@@ -64,7 +64,7 @@ $(document).ready(function(){
                     var state = value.address.state;
                     if(initLoad === true) {
                         city = $.urlParam('city');
-                        state = $.urlParam('state').toUpperCase();
+                        state = $.urlParam('state');
                     }
                     $.zoomToPin(value.lat, value.lon, city, state);
                 }
