@@ -11,7 +11,7 @@ from fabric.api import *
 import app
 import app_config
 
-logger = logging.getLogger('tumblr')
+logger = logging.getLogger('wildfires')
 file_handler = RotatingFileHandler('/var/log/wildfires.log', maxBytes=10000, backupCount=1)
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 file_handler.setFormatter(formatter)
@@ -269,16 +269,32 @@ def update_shapefiles():
     """
     Fetch the latest shapefiles and process them.
     """
-    try:
-        with lcd('data'):
-            local('curl -O http://www.wfas.net/maps/data/fdc_f.zrp')
-            local('unzip -o -j fdc_f.zip')
-            local('curl -O http://psgeodata.fs.fed.us/data/gis_data_download/dynamic/lg_incidents.zip')
-            local('unzip -o -j lg_incidents.zip')
-            local('ogr2ogr -overwrite -t_srs "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs" lg_incidents_reprojected.shp lg_incidents.shp')
-            local('ogr2ogr -overwrite -s_srs EPSG:2163 -t_srs "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs" fdc_f_reprojected.shp fdc_f.shp')
-    except Exception, e:
-        logger.error('%s' % e)
+    with lcd('data'):
+        local('rm -rf *.*')
+        local('touch example.csv')
+
+        wfas = local('curl -O http://www.wfas.net/maps/data/fdc_f.zap -w "STATUS_CODE:%{http_code} SITE:www.wfas.net"', capture=True)
+        fed = local('curl -O http://psgeodata.fs.fed.us/data/gis_data_download/dynamic/lg_incidents.zip -w "STATUS_CODE:%{http_code} SITE:psgeodata.fs.fed.us"', capture=True)
+
+        for site in [wfas, fed]:
+            if not 'STATUS_CODE:200' in site:
+                logger.error('%s' % site)
+
+        try:
+            local('unzip -o -j fdc_f.zip', capture=True)
+        except:
+            logger.error('Could not unzip fire warnings.')
+            return
+
+        try:
+            local('unzip -o -j lg_incidents.zip', capture=True)
+        except:
+            logger.error('Could not unzip incidents.')
+            return
+
+        local('ogr2ogr -overwrite -t_srs "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs" lg_incidents_reprojected.shp lg_incidents.shp')
+        local('ogr2ogr -overwrite -s_srs EPSG:2163 -t_srs "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs" fdc_f_reprojected.shp fdc_f.shp')
+
 
 def _rewrite_mml(data_root, mml_path):
     """
