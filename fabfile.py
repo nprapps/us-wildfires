@@ -2,6 +2,7 @@
 
 import datetime
 from glob import glob
+import logging
 import os
 
 from fabric.api import *
