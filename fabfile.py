@@ -157,6 +157,8 @@ def setup():
     clone_repo()
     checkout_latest()
     install_requirements()
+    create_log_file()
+    install_scout_plugins()
 
 def setup_directories():
     """
@@ -205,6 +207,14 @@ def install_requirements():
     require('settings', provided_by=[production, staging])
 
     run('%(virtualenv_path)s/bin/pip install -U -r %(repo_path)s/requirements.txt' % env)
+
+
+def install_scout_plugins():
+    """
+    Install plugins to Scout.
+    """
+    run('ln -s %(repo_path)s/scout/*.rb ~/.scout' % env)
+
 
 def create_log_file():
     """
