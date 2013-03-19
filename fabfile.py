@@ -3,6 +3,7 @@
 import datetime
 from glob import glob
 import logging
+from logging.handlers import RotatingFileHandler
 import os
 
 from fabric.api import *
@@ -11,7 +12,7 @@ import app
 import app_config
 
 logger = logging.getLogger('tumblr')
-file_handler = logging.FileHandler('/var/log/wildfires.log')
+file_handler = RotatingFileHandler('/var/log/wildfires.log', maxBytes=10000, backupCount=1)
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
