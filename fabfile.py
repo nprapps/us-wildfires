@@ -23,7 +23,7 @@ Base configuration
 """
 env.project_name = app_config.PROJECT_NAME
 env.deployed_name = app_config.DEPLOYED_NAME
-env.deploy_to_servers = False
+env.deploy_to_servers = True
 env.repo_url = 'git@github.com:nprapps/%(project_name)s.git' % env
 env.alt_repo_url = None
 env.user = 'ubuntu'
@@ -267,7 +267,7 @@ def update_shapefiles():
             local('unzip -o -j lg_incidents.zip')
             local('ogr2ogr -overwrite -t_srs "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs" lg_incidents_reprojected.shp lg_incidents.shp')
             local('ogr2ogr -overwrite -s_srs EPSG:2163 -t_srs "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs" fdc_f_reprojected.shp fdc_f.shp')
-    except Exception e:
+    except Exception, e:
         logger.error('%s' % e)
 
 def _rewrite_mml(data_root, mml_path):
