@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import datetime
 from glob import glob
 import os
 
@@ -7,6 +8,15 @@ from fabric.api import *
 
 import app
 import app_config
+
+app.config['PROPAGATE_EXCEPTIONS'] = True
+
+logger = logging.getLogger('tumblr')
+file_handler = logging.FileHandler('/var/log/wildfires.log')
+formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
+logger.setLevel(logging.INFO)
 
 """
 Base configuration
@@ -196,6 +206,13 @@ def install_requirements():
 
     run('%(virtualenv_path)s/bin/pip install -U -r %(repo_path)s/requirements.txt' % env)
 
+def create_log_file():
+    """
+    Creates the log file for recording fire updates.
+    """
+    sudo('touch /var/log/wildfires.log')
+    sudo('chown ubuntu /var/log/wildfires.log')
+
 """
 Deployment
 """
@@ -242,13 +259,16 @@ def update_shapefiles():
     """
     Fetch the latest shapefiles and process them.
     """
-    with lcd('data'):
-        local('curl -O http://www.wfas.net/maps/data/fdc_f.zip')
-        local('unzip -o -j fdc_f.zip')
-        local('curl -O http://psgeodata.fs.fed.us/data/gis_data_download/dynamic/lg_incidents.zip')
-        local('unzip -o -j lg_incidents.zip')
-        local('ogr2ogr -overwrite -t_srs "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs" lg_incidents_reprojected.shp lg_incidents.shp')
-        local('ogr2ogr -overwrite -s_srs EPSG:2163 -t_srs "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs" fdc_f_reprojected.shp fdc_f.shp')
+    try:
+        with lcd('data'):
+            local('curl -O http://www.wfas.net/maps/data/fdc_f.zip')
+            local('unzip -o -j fdc_f.zip')
+            local('curl -O http://psgeodata.fs.fed.us/data/gis_data_download/dynamic/lg_incidents.zip')
+            local('unzip -o -j lg_incidents.zip')
+            local('ogr2ogr -overwrite -t_srs "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs" lg_incidents_reprojected.shp lg_incidents.shp')
+            local('ogr2ogr -overwrite -s_srs EPSG:2163 -t_srs "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs" fdc_f_reprojected.shp fdc_f.shp')
+    except Exception e:
+        logger.error('%s' % e)
 
 def _rewrite_mml(data_root, mml_path):
     """
@@ -294,19 +314,25 @@ def server_render_map():
     """
     update_shapefiles()
 
-    env.tilemill_projects = '%(path)s/tilemill-temp' % env
+    try:
+        env.tilemill_projects = '%(path)s/tilemill-temp' % env
 
-    local('rm -rf %(tilemill_projects)s' % env)
-    local('mkdir -p %(tilemill_projects)s/project/' % env)
-    local('mkdir -p %(tilemill_projects)s/cache/' % env)
-    local('cp -R %(repo_path)s/tilemill %(tilemill_projects)s/project/%(project_name)s' % env)
+        local('rm -rf %(tilemill_projects)s' % env)
+        local('mkdir -p %(tilemill_projects)s/project/' % env)
+        local('mkdir -p %(tilemill_projects)s/cache/' % env)
+        local('cp -R %(repo_path)s/tilemill %(tilemill_projects)s/project/%(project_name)s' % env)
 
-    _rewrite_mml(
-        '%(repo_path)s/data/' % env,
-        '%(tilemill_projects)s/project/%(project_name)s/project.mml' % env
-    )
+        _rewrite_mml(
+            '%(repo_path)s/data/' % env,
+            '%(tilemill_projects)s/project/%(project_name)s/project.mml' % env
+        )
 
-    local('/usr/share/tilemill/index.js export --format=sync --bbox=-124.848974,24.396308,-66.885444,49.384358 --minzoom=3 --maxzoom=9 --files=%(tilemill_projects)s --syncAccount=npr --syncAccessToken="$MAPBOX_SYNC_ACCESS_TOKEN_WILDFIRES" us-wildfires ./README.md' % env)
+        local('/usr/share/tilemill/index.js export --format=sync --bbox=-124.848974,24.396308,-66.885444,49.384358 --minzoom=3 --maxzoom=9 --files=%(tilemill_projects)s --syncAccount=npr --syncAccessToken="$MAPBOX_SYNC_ACCESS_TOKEN_WILDFIRES" us-wildfires ./README.md' % env)
+
+        logger.info('Ran successfully at %s' % datetime.datetime.now())
+
+    except Exception, e:
+        logger.error('%s' % e)
 
 """
 Destruction
