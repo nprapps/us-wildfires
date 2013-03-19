@@ -283,7 +283,7 @@ def update_shapefiles():
         local('rm -rf *.*')
         local('touch example.csv')
 
-        wfas = local('curl -O http://www.wfas.net/maps/data/fdc_f.zap -w "STATUS_CODE:%{http_code} SITE:www.wfas.net"', capture=True)
+        wfas = local('curl -O http://www.wfas.net/maps/data/fdc_f.zip -w "STATUS_CODE:%{http_code} SITE:www.wfas.net"', capture=True)
         fed = local('curl -O http://psgeodata.fs.fed.us/data/gis_data_download/dynamic/lg_incidents.zip -w "STATUS_CODE:%{http_code} SITE:psgeodata.fs.fed.us"', capture=True)
 
         for site in [wfas, fed]:
