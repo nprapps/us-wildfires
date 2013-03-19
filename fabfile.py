@@ -9,8 +9,6 @@ from fabric.api import *
 import app
 import app_config
 
-app.config['PROPAGATE_EXCEPTIONS'] = True
-
 logger = logging.getLogger('tumblr')
 file_handler = logging.FileHandler('/var/log/wildfires.log')
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
