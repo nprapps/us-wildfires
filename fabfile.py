@@ -271,7 +271,7 @@ def update_shapefiles():
     """
     try:
         with lcd('data'):
-            local('curl -O http://www.wfas.net/maps/data/fdc_f.zip')
+            local('curl -O http://www.wfas.net/maps/data/fdc_f.zrp')
             local('unzip -o -j fdc_f.zip')
             local('curl -O http://psgeodata.fs.fed.us/data/gis_data_download/dynamic/lg_incidents.zip')
             local('unzip -o -j lg_incidents.zip')
