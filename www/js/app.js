@@ -1,5 +1,7 @@
 $(document).ready(function(){
-
+    /*
+    * Set up the map.
+    */
     var DANGER = {
         '-9999': { level: 'not-reported', name: 'Not reported' },
         '1': { level: 'low', name: 'Low' },
@@ -37,6 +39,9 @@ $(document).ready(function(){
         control.addTo(map);
     }
 
+    /*
+    * Generic functions for interaction.
+    */
     $.urlParam = function(name){
         // A function for decoding URL parameters.
         var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec(window.location.href);
@@ -88,9 +93,8 @@ $(document).ready(function(){
 
     };
 
-    function setupBookmarkBubble(){
-
-        //update the bubble text so that it's correct for this app
+    $.setupBookmarkBubble = function(){
+        // Update the bubble text so that it's correct for this app.
         google.bookmarkbubble.Bubble.prototype.msg = {
           android:
             '<b>Install this app:</b><br /> 1) Add to Bookmarks,<br /> 2) Tap and Hold the bookmark,<br /> 3) Select "<b>Add Shortcut to Home</b>"',
@@ -131,9 +135,33 @@ $(document).ready(function(){
 
             bubble.showIfAllowed();
         }, 1000 /** delay to show the bubble */ );
+    };
+
+    /*
+    * Events and such.
+    */
+    uGrid.on('click', function(data){
+        $.zoomToPin(data.latlng.lat, data.latlng.lng, null, null);
+    });
+
+    if (!navigator.geolocation) {
+        $("#find,find2").hide();
     }
 
-    $("#about").click(function(){
+    if(window.location.search.indexOf("embed") > 0) {
+        $("#nav").hide();
+        $("#embed-nav").show();
+        $("#topper").addClass("embedded");
+        $("#embed-nav").on('click', function(){ window.open('http://apps.npr.org/fire-forecast/'); });
+    } else {
+        $.setupBookmarkBubble();
+    }
+
+    if ($.urlParam('city') && $.urlParam('state')) {
+        $.geocode($.urlParam('city') + ', ' + $.urlParam('state'), true);
+    }
+
+    $("#about").on('click', function(){
         if($(".modal-body").children().length < 1 ) {
             $(".modal h3").text($(".legend-contents .headline").text());
             $(".legend-contents .headline").hide();
@@ -141,28 +169,9 @@ $(document).ready(function(){
         }
     });
 
-    if(window.location.search.indexOf("embed") > 0) {
-        $("#nav").hide();
-        $("#embed-nav").show();
-        $("#topper").addClass("embedded");
-        $("#embed-nav").click(function(){window.open('http://apps.npr.org/fire-forecast');});
-    } else {
-        //only set up the bubble if we're not embedded
-        setupBookmarkBubble();
-    }
-
-    //for old browsers and for IE in a frame
-    if (!navigator.geolocation) {
-        $("#find,find2").hide();
-    }
-
-    $('#search').on('submit', function(e){
+    $('#search, #search2').on('submit', function(e){
         e.preventDefault();
-        $.geocode(encodeURIComponent($('#search input').val()), false);
-    });
-    $('#search2').on('submit', function(e){
-        e.preventDefault();
-        $.geocode(encodeURIComponent($('#search2 input').val()), false);
+        $.geocode(encodeURIComponent($('#' + $(this).attr('id') + ' input').val()), false);
     });
 
     $('#find,#find2').on('click', function(){
@@ -175,9 +184,5 @@ $(document).ready(function(){
             }
         );
     });
-
-    if ($.urlParam('city') && $.urlParam('state')) {
-        $.geocode($.urlParam('city') + ', ' + $.urlParam('state'), true);
-    }
 
 });
