@@ -265,10 +265,20 @@ def update_config_from_tilemill():
     local('rm -rf tilemill/' % env)
     local('cp -R %(tilemill_projects)s/%(project_name)s/ tilemill/' % env)
 
+
+class UpdateShapefileError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
 def update_shapefiles():
     """
     Fetch the latest shapefiles and process them.
     """
+
     with lcd('data'):
         local('rm -rf *.*')
         local('touch example.csv')
@@ -278,19 +288,17 @@ def update_shapefiles():
 
         for site in [wfas, fed]:
             if not 'STATUS_CODE:200' in site:
-                logger.error('%s' % site)
+                raise UpdateShapefileError('Could not download file from %s' % site)
 
         try:
             local('unzip -o -j fdc_f.zip', capture=True)
         except:
-            logger.error('Could not unzip fire warnings.')
-            return
+            raise UpdateShapefileError('Could not unzip fire warnings.')
 
         try:
             local('unzip -o -j lg_incidents.zip', capture=True)
         except:
-            logger.error('Could not unzip incidents.')
-            return
+            raise UpdateShapefileError('Could not unzip incidents.')
 
         local('ogr2ogr -overwrite -t_srs "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs" lg_incidents_reprojected.shp lg_incidents.shp')
         local('ogr2ogr -overwrite -s_srs EPSG:2163 -t_srs "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs" fdc_f_reprojected.shp fdc_f.shp')
@@ -323,10 +331,13 @@ def local_render_map():
     """
     Render the map locally on OSX.
     """
-    update_shapefiles()
-    update_config_from_version_control()
+    try:
+        update_shapefiles()
+        update_config_from_version_control()
+        local('/Applications/TileMill.app/Contents/Resources/node /Applications/TileMill.app/Contents/Resources/index.js export --format=sync --bbox=-124.848974,24.396308,-66.885444,49.384358 --minzoom=3 --maxzoom=9 us-wildfires README.md')
 
-    local('/Applications/TileMill.app/Contents/Resources/node /Applications/TileMill.app/Contents/Resources/index.js export --format=sync --bbox=-124.848974,24.396308,-66.885444,49.384358 --minzoom=3 --maxzoom=9 us-wildfires README.md')
+    except Exception, e:
+        logger.error('%s' % e)
 
 def render_map():
     """
@@ -338,9 +349,8 @@ def server_render_map():
     """
     Render the map locally on the server. Intended to be used as a cron.
     """
-    update_shapefiles()
-
     try:
+        update_shapefiles()
         env.tilemill_projects = '%(path)s/tilemill-temp' % env
 
         local('rm -rf %(tilemill_projects)s' % env)
