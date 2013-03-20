@@ -162,11 +162,12 @@ $(document).ready(function(){
     }
 
     $("#about").on('click', function(){
-        if($(".modal-body").children().length < 1 ) {
+        if($(".modal-body").children().length === 0 ) {
             $(".modal h3").text($(".legend-contents .headline").text());
             $(".legend-contents .headline").hide();
             $(".legend-contents").clone().appendTo(".modal-body");
         }
+        $('#myModal').modal();
     });
 
     $('#search, #search2').on('submit', function(e){
