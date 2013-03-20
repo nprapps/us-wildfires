@@ -32,6 +32,7 @@ L.Util.ajax = function (url, cb) {
 	};
 	request.send();
 };
+
 L.UtfGrid = L.Class.extend({
 	includes: L.Mixin.Events,
 	options: {
@@ -48,6 +49,7 @@ L.UtfGrid = L.Class.extend({
 	},
 
 	_mouseOn: null,
+    _tileCallbacks: {},
 
 	initialize: function (url, options) {
 		L.Util.setOptions(this, options);
@@ -93,37 +95,35 @@ L.UtfGrid = L.Class.extend({
 
 	// Modified to use the dataForLatLng() function and a callback.
 	_click: function (e) {
-		var self = this;
-		this.dataForLatLng(e.latlng, function(data){
-			self.fire('click', data);
-		});
+		this.dataForLatLng(e.latlng, L.Util.bind(function(data){
+			this.fire('click', data);
+		}, this));
 	},
 
 	// Modified to use the dataForLatLng() function and a callback.
 	_move: function (e) {
-		var self = this;
-		this.dataForLatLng(e.latlng, function(data){
+		this.dataForLatLng(e.latlng, L.Util.bind(function(data){
 
-			if (data.data !== self._mouseOn) {
-				if (self._mouseOn) {
-					self.fire('mouseout', { latlng: e.latlng, data: self._mouseOn });
-					if (self.options.pointerCursor) {
-						self._container.style.cursor = '';
+			if (data.data !== this._mouseOn) {
+				if (this._mouseOn) {
+					this.fire('mouseout', { latlng: e.latlng, data: this._mouseOn });
+					if (this.options.pointerCursor) {
+						this._container.style.cursor = '';
 					}
 				}
 				if (data.data) {
-					self.fire('mouseover', data);
-					if (self.options.pointerCursor) {
-						self._container.style.cursor = 'pointer';
+					this.fire('mouseover', data);
+					if (this.options.pointerCursor) {
+						this._container.style.cursor = 'pointer';
 					}
 				}
 
-				self._mouseOn = data.data;
+				this._mouseOn = data.data;
 			} else if (data.data) {
-				self.fire('mousemove', data);
+				this.fire('mousemove', data);
 			}
 
-		});
+		}, this));
 	},
 
 	dataForLatLng: function(latlng, callback) {
@@ -135,11 +135,6 @@ L.UtfGrid = L.Class.extend({
 		* Our change to this process forces the utfgrid loading process to occur with a callback
 		* so that we can specify that any particular grid point be loaded when we need it.
 		*/
-
-		// Trick to solve global scope. "this" ain't what you think it is within the enclosures.
-		var self = this;
-
-		// Unchanged.
 		var map = this._map,
 			point = map.project(latlng),
 			tileSize = this.options.tileSize,
@@ -169,15 +164,15 @@ L.UtfGrid = L.Class.extend({
 		// If this data wasn't in the cache, force the _loadTile(P) bits to run.
 		// Then, fire the callback with our data.
 		if (this.options.useJsonP) {
-			this._loadTileP(zoom, x, y, function(data){
-				callback(self._lookupGrid(latlng, data, gridX, gridY));
+			this._loadTileP(zoom, x, y, L.Util.bind(function(data){
+				callback(this._lookupGrid(latlng, data, gridX, gridY));
 				return;
-			});
+			}, this));
 		} else {
-			this._loadTile(zoom, x, y, function(data){
-				callback(self._lookupGrid(latlng, data, gridX, gridY));
+			this._loadTile(zoom, x, y, L.Util.bind(function(data){
+				callback(this._lookupGrid(latlng, data, gridX, gridY));
 				return;
-			});
+			}, this));
 		}
 	},
 
@@ -223,9 +218,13 @@ L.UtfGrid = L.Class.extend({
 					this._cache[key] = null;
 
 					if (this.options.useJsonP) {
-						this._loadTileP(zoom, xw, yw);
+						this._loadTileP(zoom, xw, yw, L.Util.bind(function(data) {
+                            this._cache[key] = data;
+                        }, this));
 					} else {
-						this._loadTile(zoom, xw, yw);
+						this._loadTile(zoom, xw, yw, L.Util.bind(function(data) {
+                            this._cache[key] = data;
+                        }, this));
 					}
 				}
 			}
@@ -237,8 +236,14 @@ L.UtfGrid = L.Class.extend({
 		var head = document.getElementsByTagName('head')[0],
 			key = zoom + '_' + x + '_' + y,
 			functionName = 'lu_' + key,
-			wk = this._windowKey,
-			self = this;
+			wk = this._windowKey;
+
+        if (key in this._tileCallbacks) {
+            this._tileCallbacks[key].push(callback);
+            return;
+        } else {
+            this._tileCallbacks[key] = [callback];
+        }
 
 		var url = L.Util.template(this._url, L.Util.extend({
 			s: L.TileLayer.prototype._getSubdomain.call(this, { x: x, y: y }),
@@ -252,14 +257,17 @@ L.UtfGrid = L.Class.extend({
 		script.setAttribute("type", "text/javascript");
 		script.setAttribute("src", url);
 
-		window[wk][functionName] = function (data) {
-			self._cache[key] = data;
+		window[wk][functionName] = L.Util.bind(function (data) {
+            callbacks = this._tileCallbacks[key];
 
-			// After the data gets inserted into the cache, trigger the callback.
-			if (callback) { callback(data); }
+            for (i = 0; i < callbacks.length; i ++) {
+			    callbacks[i](data);
+            }
+
+            delete this._tileCallbacks[key];
 			delete window[wk][functionName];
 			head.removeChild(script);
-		};
+		}, this);
 
 		head.appendChild(script);
 	},
@@ -274,12 +282,22 @@ L.UtfGrid = L.Class.extend({
 		}, this.options));
 
 		var key = zoom + '_' + x + '_' + y;
-		var self = this;
-		L.Util.ajax(url, function (data) {
-			self._cache[key] = data;
 
-			// After the data gets inserted into the cache, trigger the callback.
-			if (callback) { callback(data); }
+        if (key in this._tileCallbacks) {
+            this._tileCallbacks[key].push(callback);
+            return;
+        } else {
+            this._tileCallbacks[key] = [callback];
+        }
+
+		L.Util.ajax(url, function (data) {
+            callbacks = this._tileCallbacks[key];
+
+            for (i = 0; i < callbacks.length; i ++) {
+			    callbacks[i](data);
+            }
+
+            delete this._tileCallbacks[key];
 		});
 	},
 
