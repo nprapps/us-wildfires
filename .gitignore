@@ -31,17 +31,13 @@ pip-log.txt
 gzip
 
 node_modules
-www/index.html
-www/simple.html
-www/table.html
-www/map.html
-www/css/app.css
-www/css/app.min.css
-www/css/tables.min.css
-www/js/app-header.min.js
-www/js/app-footer.min.js
+www/*.html
+www/css/*.min.css
+www/css/*.less.css
+www/js/*.min.js
 www/js/templates.js
-www/js/tables.min.js
+www/js/app_config.js
+confs/rendered/*
 
 data/fdc_f.*
 data/lg_incidents.*
