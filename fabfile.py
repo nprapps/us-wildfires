@@ -23,12 +23,13 @@ Base configuration
 """
 env.project_name = app_config.PROJECT_NAME
 env.deployed_name = app_config.DEPLOYED_NAME
+env.repository_name = app_config.REPOSITORY_NAME
 env.deploy_to_servers = True
-env.repo_url = 'git@github.com:nprapps/%(project_name)s.git' % env
+env.repo_url = 'git@github.com:nprapps/%(repository_name)s.git' % env
 env.alt_repo_url = None
 env.user = 'ubuntu'
 env.python = 'python2.7'
-env.path = '/home/%(user)s/apps/%(project_name)s' % env
+env.path = '/home/%(user)s/apps/%(repository_name)s' % env
 env.repo_path = '%(path)s/repository' % env
 env.virtualenv_path = '%(path)s/virtualenv' % env
 env.tilemill_projects = os.path.expanduser('~/Documents/MapBox/project')
