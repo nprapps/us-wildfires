@@ -5,6 +5,8 @@ from flask import Markup, g
 from slimit import minify
 
 import app_config
+import copytext
+
 
 class Includer(object):
     """
@@ -25,7 +27,7 @@ class Includer(object):
     def render(self, path):
         if getattr(g, 'compile_includes', False):
             out_filename = 'www/%s' % path
-            
+
             if out_filename not in g.compiled_includes:
                 print 'Rendering %s' % out_filename
 
@@ -38,7 +40,7 @@ class Includer(object):
             markup = Markup(self.tag_string % path)
         else:
             response = ','.join(self.includes)
-            
+
             response = '\n'.join([
                 self.tag_string % src for src in self.includes
                 ])
@@ -47,7 +49,8 @@ class Includer(object):
 
         del self.includes[:]
 
-        return markup 
+        return markup
+
 
 class JavascriptIncluder(Includer):
     """
@@ -63,9 +66,11 @@ class JavascriptIncluder(Includer):
 
         for src in self.includes:
             with open('www/%s' % src) as f:
+                print '- compressing %s' % src
                 output.append(minify(f.read()))
 
         return '\n'.join(output)
+
 
 class CSSIncluder(Includer):
     """
@@ -81,18 +86,39 @@ class CSSIncluder(Includer):
 
         for src in self.includes:
             if src.endswith('less'):
-                src = src.replace('less', 'css')
+                src = src.replace('less', 'css')  # less/example.less -> css/example.css
+                src = '%s.less.css' % src[:-4]    # css/example.css -> css/example.less.css
 
             with open('www/%s' % src) as f:
+                print '- compressing %s' % src
                 output.append(cssmin(f.read()))
 
         return '\n'.join(output)
 
+
+def flatten_app_config():
+    """
+    Returns a copy of app_config containing only
+    configuration variables.
+    """
+    config = {}
+
+    # Only all-caps [constant] vars get included
+    for k, v in app_config.__dict__.items():
+        if k.upper() == k:
+            config[k] = v
+
+    return config
+
+
 def make_context():
-    context = app_config.__dict__
+    """
+    Create a base-context for rendering views.
+    Includes app_config and JS/CSS includers.
+    """
+    context = flatten_app_config()
 
     context['JS'] = JavascriptIncluder()
     context['CSS'] = CSSIncluder()
 
     return context
-

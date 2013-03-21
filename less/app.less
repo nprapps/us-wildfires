@@ -737,8 +737,25 @@ p.desc {background:url('../img/npr_75x25.png') no-repeat center left; padding-le
 .danger-extreme { background-color: #D73027; }
 .danger-not-reported { background-color: #eeeeee; }
 
+.legend-contents li { float:left; width:100%; display:block; }
+
 @media (max-width: 479px) {
     #nav li.arts, #nav li.music { display:none; }
+    .modal-header h3 { font-size:18px; }
+    .legend-contents p { font-size:12px; margin:6px 0;}
+    .legend-contents p.read-more { font-size:12px; margin:6px 0; }
+    .legend-contents ul { line-height:20px; }
+    .legend-contents span { height:12px; width:12px; }
+    .legend-contents li { line-height:14px; font-size:12px; width:48%; }
+    .modal-header { padding:6px; }
+    .modal-body { padding: 6px; }
+    .share-buttons { display:none!important; height:0px; padding:0; margin:0; }
+    #topper #about { width:82px; }
+    #search { margin:10px 5px; }
+}
+
+@media screen and (device-aspect-ratio: 2/3) {
+    .modal-body p { font-size:11px!important; line-height:12px!important; }
 }
 
 @media (min-width:650px) {
