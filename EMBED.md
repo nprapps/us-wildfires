@@ -24,6 +24,7 @@ You can construct an iframe tag with this fancy URL you've targeted to a city/st
     width="100%"
     height="600px"
     src="http://apps.npr.org/fire-forecast/?city=Rio%20Grande%20City&state=Texas&embed=true"
+    frameborder=None
 ></iframe>
 ```
 
