@@ -265,7 +265,7 @@ def update_config_from_tilemill():
     Copy the latest configuration from TileMill to the local directory.
     """
     local('rm -rf tilemill/' % env)
-    local('cp -R %(tilemill_projects)s/%(project_slug)s/ tilemill/' % env)
+    local('cp -R %(tilemill_projects)s/%(repository_name)s/ tilemill/' % env)
 
 
 class UpdateShapefileError(Exception):
