@@ -5,7 +5,6 @@ from flask import Markup, g
 from slimit import minify
 
 import app_config
-import copytext
 
 
 class Includer(object):
@@ -41,9 +40,7 @@ class Includer(object):
         else:
             response = ','.join(self.includes)
 
-            response = '\n'.join([
-                self.tag_string % src for src in self.includes
-                ])
+            response = '\n'.join([self.tag_string % src for src in self.includes])
 
             markup = Markup(response)
 
