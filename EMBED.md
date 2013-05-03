@@ -32,10 +32,12 @@ This sample code creates an iframe that will be as wide as the article template 
 ## Troubleshooting
 * Make sure your iframe has a width and a height. These are both required.
 * When you append parameters to a URL, the first parameter uses a ? and the rest use a &, like this:
+
 ```
 http://url.com/?one=one
 http://url.com/?one=one&two=two
 http://url.com/?one=one&two=two&three=three
 ```
+
 * Try doing a Google Search for the city name. Sometimes, the names will surprise you. "Rio Grande" won't work in Texas (points to the river) but "Rio Grande City" does.
 * Still stuck? [Email the News Apps team](mailto:nprapps@npr.org).
