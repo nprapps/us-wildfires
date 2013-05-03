@@ -321,12 +321,12 @@ def update_config_from_version_control():
     """
     Copy the latest configuration to TileMill from the local directory.
     """
-    local('rm -rf %(tilemill_projects)s/%(project_slug)s/' % env)
-    local('cp -R tilemill/ %(tilemill_projects)s/%(project_slug)s/' % env)
+    local('rm -rf %(tilemill_projects)s/%(repository_name)s/' % env)
+    local('cp -R tilemill/ %(tilemill_projects)s/%(repository_name)s/' % env)
 
     _rewrite_mml(
         '%s/data/' % os.getcwd(),
-        '%(tilemill_projects)s/%(project_slug)s/project.mml' % env
+        '%(tilemill_projects)s/%(repository_name)s/project.mml' % env
     )
 
 def local_render_map():
@@ -358,11 +358,11 @@ def server_render_map():
         local('rm -rf %(tilemill_projects)s' % env)
         local('mkdir -p %(tilemill_projects)s/project/' % env)
         local('mkdir -p %(tilemill_projects)s/cache/' % env)
-        local('cp -R %(repo_path)s/tilemill %(tilemill_projects)s/project/%(repo_name)s' % env)
+        local('cp -R %(repo_path)s/tilemill %(tilemill_projects)s/project/%(repository_name)s' % env)
 
         _rewrite_mml(
             '%(repo_path)s/data/' % env,
-            '%(tilemill_projects)s/project/%(repo_name)s/project.mml' % env
+            '%(tilemill_projects)s/project/%(repository_name)s/project.mml' % env
         )
 
         local('/usr/share/tilemill/index.js export --format=sync --bbox=-124.848974,24.396308,-66.885444,49.384358 --minzoom=3 --maxzoom=9 --files=%(tilemill_projects)s --syncAccount=npr --syncAccessToken="$MAPBOX_SYNC_ACCESS_TOKEN_WILDFIRES" us-wildfires ./README.md' % env)
