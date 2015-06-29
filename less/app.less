@@ -214,6 +214,51 @@ p.desc {background:url('../img/npr_75x25.png') no-repeat center left; padding-le
     top: -10px;
 }
 
+#game-over {
+    background-color: #ECF4F3;
+    width: 50%;
+    height: 50%;
+    left: 25%;
+    right: 25%;
+    top: 20%;
+}
+
+#game-over .modal-body {
+    text-align: center;
+    padding: 6vw 8vw;
+    width: 75%;
+
+    img {
+        width: 80px;
+    }
+
+    h3 {
+        padding-top: 20px;
+        font-size: 40px;
+        font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+    }
+
+    p {
+        font-size: 18px;
+        line-height: 18px;
+    }
+
+    .btn {
+        margin-top: 20px;
+        color: #fff
+    }
+}
+
+@media (max-width: 479px) {
+    #game-over {
+        width: 90%;
+        height: 90%;
+        left: 5%;
+        right: 5%;
+        top: 5%;
+    }
+}
+
 /* Leaflet CSS */
 
 /* required styles */
