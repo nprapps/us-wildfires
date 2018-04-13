@@ -1,4 +1,4 @@
-cssmin==0.1.4
+cssmin>=0.1.4
 dulwich==0.9.1
 envoy==0.0.2
 Fabric==1.4.3
